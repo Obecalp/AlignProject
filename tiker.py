@@ -7,6 +7,7 @@ from Bio import Align
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 Scorelist=[]
 def takeScore(elem):
@@ -22,10 +23,10 @@ def AlignMeDaddy():
         for index,GoodBoi in enumerate(listons.curselection()):
             if GoodBoi not in Badbois:
                 Scorelist.append((listons.get(GoodBoi)[0],listons.get(SupaBoi)[0],aligner.score(listons.get(GoodBoi)[1],listons.get(SupaBoi)[1])))
+    print(Scorelist)
     Scorelist.sort(key=takeScore)
     for index,paire in enumerate(Scorelist):
         listresult.insert(index,(Scorelist[index][0],Scorelist[index][1],Scorelist[index][2]))
-    print(Scorelist)
 
 def getfasta(fasta_file):
     nameHandle=open(fasta_file,"r")
