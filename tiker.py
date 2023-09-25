@@ -33,7 +33,7 @@ def OpenMe():
    filename = askopenfilename(title="Ouvrir votre document",filetypes=[('fasta files','.fasta'),('all files','.*')])
    fastafile = getfasta(filename)
    for index,sequence in enumerate(fastafile):
-        listons.insert(index,sequence,"\t",fastafile[sequence])
+        listons.insert(index,(sequence,fastafile[sequence]))
 
 
 listAlign=[('babou','ATGC'),('weee','GGCT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT')]
