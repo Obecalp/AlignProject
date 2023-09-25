@@ -31,9 +31,9 @@ def Printmedaddy():
 
 def OpenMe():
    filename = askopenfilename(title="Ouvrir votre document",filetypes=[('fasta files','.fasta'),('all files','.*')])
-   fichier = open(filename, "r")
-   content = fichier.read()
-   fichier.close()
+   fastafile = getfasta(filename)
+   for index,sequence in enumerate(fastafile):
+        listons.insert(index,sequence,"\t",fastafile[sequence])
 
 
 listAlign=[('babou','ATGC'),('weee','GGCT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT'),('wagadugou','GGT')]
@@ -68,7 +68,17 @@ yscrollbar.pack(side="right", fill="y")
 xscrollbar.pack(side='bottom',fill="x")
 listons.configure(yscrollcommand=yscrollbar.set,xscrollcommand=xscrollbar.set)
 listons.pack()
+####################################
 
+
+#
+#
+#
+#
+#
+#
+#
+##############################
 #Frame de résultat et choix d'impression
 ResultFrame=Frame(root)
 ResultFrame.place(x=0,y=150,width='500',height='150')
@@ -83,7 +93,6 @@ Phylo.pack(side='right')
 Network.pack(side='right')
 ChoiceFrame.pack()
 
-
 #affichage des alignements
 listresult=Listbox(ResultFrame,width=250)
 resultY = ttk.Scrollbar(ResultFrame, orient="vertical", command=listresult.yview) 
@@ -94,7 +103,7 @@ listresult.configure(yscrollcommand=yscrollbar.set,xscrollcommand=xscrollbar.set
 listresult.pack()
 
 
-
+########################################
 #Menu de sélection des fichiers
 menubar = Menu(root)
 filemenu = Menu(menubar, tearoff=0)
