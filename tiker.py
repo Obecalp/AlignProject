@@ -10,19 +10,18 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-#Important à noter: l'utilisation du dictionnaire DicoAlign est basé sur le principe que depuis python 3.7 l'ordre d'un dictionnaire est maintenu.
+
 
 DicoAlign={}
 
 def AlignMeDaddy():
     listresult.delete(0,END)
-    aligner = Align.PairwiseAligner()
-    aligner.mode='global'
     UsedSequence=[]
-    global Scorelist
     for index1,Sequence in enumerate(listons.curselection()):
         DicoAlign[listons.get(Sequence)[0]]=[]
     for Seq1 in listons.curselection():
+        UsedSequence.append(listons.get(Seq1)[0])
+        DicoAlign[listons.get(Seq1)[0]].append(0)
         for index2,Seq2 in enumerate(listons.curselection()):
             if listons.get(Seq2)[0] not in UsedSequence:
                 ScoreAlign=pairwise2.align.globalxx(listons.get(Seq1)[1], listons.get(Seq2)[1],score_only=True)
@@ -31,7 +30,6 @@ def AlignMeDaddy():
                 if Seq1!=Seq2:DicoAlign[listons.get(Seq2)[0]].append(ScoreAlign)
     
     #Pour gérer la correspondance entre les séquence alignée et éviter de refaire l'alignement deux fois pour chaque séquence, Seq1 est stockée dans UsedSequence
-        UsedSequence.append(listons.get(Seq1)[0])
     #Les tableau de score de DicoAlign et UsedSequence étant dans le même ordre,insertion dans la liste des score affichée en évitant de répéter la même paire deux fois
     for lines,Seq in enumerate(DicoAlign):
             for line in range(lines,len(DicoAlign)):
@@ -43,7 +41,7 @@ def getfasta(fasta_file):
     fastas={}
     for line in nameHandle:
         if line[0]=='>':
-            header=line[1:-2]
+            header=line[1:-1]
             fastas[header]=''
         else:
             fastas[header]+=line.split('\n')[0]
@@ -51,7 +49,8 @@ def getfasta(fasta_file):
     return(fastas)
 
 def selectall():
-    listons.selection_set(0,listons.size())
+    if listons.size()>0:listons.selection_set(0,listons.size())
+    else:alerteThis("Pas de séquence à sélectionner")
 
 def deselect():
     listons.selection_clear(0,listons.size())
@@ -74,6 +73,7 @@ def NetworkThis():
     if len(DicoAlign)<3:
             alerteThis("Pour faire un réseau veuillez aligner au moins trois séquences")
     else:
+        print(DicoAlign)
     #ListSeq: Toutes les clés de DicoAlign
         ListSeq=list(DicoAlign)
         Edgelist=[]
@@ -90,17 +90,18 @@ def NetworkThis():
 
 def HeatmapThis():
     print(len(DicoAlign))
-    if len(DicoAlign)<4:
+    if len(DicoAlign)<3:
             alerteThis("Pour faire une heatmap alignez au moins trois séquences")
     else:
         Heatlist=[]
         [Heatlist.append(DicoAlign[sequence]) for sequence in DicoAlign]
-        Heatlist.reverse()
+        Heatlist
         print(Heatlist)
+        mask = np.zeros_like(Heatlist, dtype=np.bool_)
+        mask[np.triu_indices_from(mask)] = True
         shaba=DicoAlign.keys()
         inverse=list(shaba)
-        inverse.reverse()
-        sns.heatmap(Heatlist,xticklabels=DicoAlign.keys(),yticklabels=inverse)
+        sns.heatmap(Heatlist,xticklabels=list(DicoAlign.keys()),yticklabels=inverse,mask=mask)
         plt.show()
 
 
@@ -128,7 +129,8 @@ def answerThis(*answer):
 
 #listAlign=[('babou','ATGC'),('weee','CTAGCTTTAGATTGATCGCGATCGATCGA'),('SHABOUGADA','CAGTAGGGGATCGATCTGGATCGA'),('houhouhou','AGCTAGCTCTTGATCGAGGT'),('Shabadouuuu','AGCTAGCTAGTCTGATCGGTAGTAGTCAGTATGCATGACGGT'),('wagadugou','GGT'),('yapapa','GCGAGGAGCGGTGGATCGAAGCTAGCTGATCGATCGATCGTAT')]
 
-
+def NukeThis():
+     listons.delete(0,END)
 root = Tk()
 root.title("Spiderboii")
 root.geometry("500x300")
@@ -189,7 +191,7 @@ listresult.pack()
 menubar = Menu(root)
 filemenu = Menu(menubar, tearoff=0)
 filemenu.add_command(label="Open",command=OpenMe)
-filemenu.add_command(label="Restart")
+filemenu.add_command(label="Restart",command=NukeThis)
 
 filemenu.add_separator()
 filemenu.add_command(label="Exit", command=root.quit)
