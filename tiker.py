@@ -9,24 +9,46 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-Scorelist=[]
-def takeScore(elem):
-    return elem[2]
+#Important à noter: l'utilisation du dictionnaire DicoAlign est basé sur le principe que depuis python 3.7 l'ordre d'un dictionnaire est maintenu.
+
+# Scorelist=[]
+# def takeScore(elem):
+#     return elem[2]
 
 def AlignMeDaddy():
+    listresult.delete(0,END)
     aligner = Align.PairwiseAligner()
     Badbois={}
+    UsedSequence=[]
+    global DicoAlign
+    DicoAlign={}
     global Scorelist
-    listescore=[]
-    for SupaBoi in listons.curselection():
-        Badbois[SupaBoi]="NastyBoi"
-        for index,GoodBoi in enumerate(listons.curselection()):
-            if GoodBoi not in Badbois:
-                Scorelist.append((listons.get(GoodBoi)[0],listons.get(SupaBoi)[0],aligner.score(listons.get(GoodBoi)[1],listons.get(SupaBoi)[1])))
-    print(Scorelist)
-    Scorelist.sort(key=takeScore)
-    for index,paire in enumerate(Scorelist):
-        listresult.insert(index,(Scorelist[index][0],Scorelist[index][1],Scorelist[index][2]))
+    for index1,Sequence in enumerate(listons.curselection()):
+        DicoAlign[listons.get(Sequence)[0]]=[]
+    for Seq1 in listons.curselection():
+        for index2,Seq2 in enumerate(listons.curselection()):
+            if listons.get(Seq2)[0] not in UsedSequence:
+                ScoreAlign=aligner.score(listons.get(Seq1)[1],listons.get(Seq2)[1])
+                DicoAlign[listons.get(Seq1)[0]].append(ScoreAlign)
+                print(listons.get(Seq1)[0],listons.get(Seq2)[0],ScoreAlign)
+                if Seq1!=Seq2:DicoAlign[listons.get(Seq2)[0]].append(ScoreAlign)
+    
+    #Pour gérer la correspondance entre les séquence alignée et éviter de refaire l'alignement deux fois pour chaque séquence, Seq1 est stockée dans UsedSequence
+        UsedSequence.append(listons.get(Seq1)[0])
+    #Les tableau de score de DicoAlign et UsedSequence étant dans le même ordre,insertion dans la liste des score affichée en évitant de répéter la même paire deux fois
+    for lines,Seq in enumerate(DicoAlign):
+            for line in range(lines,len(DicoAlign)):
+                listresult.insert((lines+line),(Seq,UsedSequence[line],DicoAlign[Seq][line]))
+    print(list(DicoAlign))
+    # for SupaBoi in listons.curselection():
+    #     Badbois[SupaBoi]="NastyBoi"
+    #     for index,GoodBoi in enumerate(listons.curselection()):
+    #         if GoodBoi not in Badbois:
+    #             Scorelist.append((listons.get(GoodBoi)[0],listons.get(SupaBoi)[0],aligner.score(listons.get(GoodBoi)[1],listons.get(SupaBoi)[1])))
+    # print(Scorelist)
+    # Scorelist.sort(key=takeScore)
+    # for index,paire in enumerate(Scorelist):
+    #     listresult.insert(index,(Scorelist[index][0],Scorelist[index][1],Scorelist[index][2]))
 
 def getfasta(fasta_file):
     nameHandle=open(fasta_file,"r")
@@ -59,12 +81,36 @@ def OpenMe():
     for index,sequence in enumerate(fastafile):
         listons.insert(index,(sequence,fastafile[sequence]))
 
+#Afficher le Network
 def NetworkThis():
-    print(Scorelist)
+    #ListSeq: Toutes les clés de DicoAlign
+    ListSeq=list(DicoAlign)
+    Edgelist=[]
+    #Rappel,listes de DicoAlign contiennent un alignement supplémentaire (auto-alignement) qui n'est pas pris en compte pour le Network"
+    for index1,Sequence in enumerate(DicoAlign):
+        for index2 in range(index1+1,len(ListSeq)):
+            print(index1,index2)
+            Edgelist.append((Sequence,ListSeq[index2],DicoAlign[Sequence][index2]))
+    print(Edgelist)
     G=nx.Graph()
-    G.add_weighted_edges_from(Scorelist)
+    G.add_weighted_edges_from(Edgelist)
     nx.draw(G,with_labels=True)
     plt.show()
+
+def HeatmapThis():
+    Heatlist=[]
+    [Heatlist.append(DicoAlign[sequence]) for sequence in DicoAlign]
+    Heatlist.reverse()
+    print(Heatlist)
+    shaba=DicoAlign.keys()
+    inverse=list(shaba)
+    inverse.reverse()
+    sns.heatmap(Heatlist,xticklabels=DicoAlign.keys(),yticklabels=inverse)
+    plt.show()
+
+def alerteThis():
+        print("cocooooooooooooooo")
+
 
 listAlign=[('babou','ATGC'),('weee','CTAGCTTTAGATTGATCGCGATCGATCGA'),('SHABOUGADA','CAGTAGGGGATCGATCTGGATCGA'),('houhouhou','AGCTAGCTCTTGATCGAGGT'),('Shabadouuuu','AGCTAGCTAGTCTGATCGGTAGTAGTCAGTATGCATGACGGT'),('wagadugou','GGT'),('yapapa','GCGAGGAGCGGTGGATCGAAGCTAGCTGATCGATCGATCGTAT')]
 
@@ -105,7 +151,7 @@ ResultFrame.place(x=0,y=150,width='500',height='150')
 
 #Sous-frame de choix de mode d'affichage
 ChoiceFrame=Frame(ResultFrame)
-Heatme=Button(ChoiceFrame,text='Heatmap',command=Printmedaddy)
+Heatme=Button(ChoiceFrame,text='Heatmap',command=HeatmapThis)
 Phylo=Button(ChoiceFrame,text='Phylo')
 Network=Button(ChoiceFrame,text='Network',command=NetworkThis)
 Heatme.pack(side='left')
