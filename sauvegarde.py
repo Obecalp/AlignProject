@@ -25,7 +25,7 @@ def AlignMeDaddy():
     for Seq1 in listons.curselection():
         for index2,Seq2 in enumerate(listons.curselection()):
             if listons.get(Seq2)[0] not in UsedSequence:
-                ScoreAlign=pairwise2.align.globalxx(listons.get(Seq1)[1], listons.get(Seq2)[1],score_only=True)
+                ScoreAlign=aligner.score(listons.get(Seq1)[1],listons.get(Seq2)[1])
                 DicoAlign[listons.get(Seq1)[0]].append(ScoreAlign)
                 print(listons.get(Seq1)[0],listons.get(Seq2)[0],ScoreAlign)
                 if Seq1!=Seq2:DicoAlign[listons.get(Seq2)[0]].append(ScoreAlign)
@@ -89,7 +89,6 @@ def NetworkThis():
         plt.show()
 
 def HeatmapThis():
-    print(len(DicoAlign))
     if len(DicoAlign)<4:
             alerteThis("Pour faire une heatmap alignez au moins trois séquences")
     else:
